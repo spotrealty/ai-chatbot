@@ -19,14 +19,16 @@ def chat():
 
     try:
         # Get OpenAI API key from environment variables
-        openai.api_key = os.getenv("OPENAI_API_KEY")
+        openai_api_key = os.getenv("OPENAI_API_KEY")
 
-        # Ensure API key is set
-        if not openai.api_key:
+        if not openai_api_key:
             return jsonify({"error": "OpenAI API key is missing"}), 500
 
-        # Call OpenAI API (Updated structure)
-        response = openai.ChatCompletion.create(
+        # Create OpenAI client
+        client = openai.OpenAI(api_key=openai_api_key)
+
+        # Call OpenAI's latest API format
+        response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a helpful real estate assistant."},
@@ -34,7 +36,9 @@ def chat():
             ]
         )
 
-        bot_reply = response["choices"][0]["message"]["content"]
+        # Extract response correctly
+        bot_reply = response.choices[0].message.content
+
         return jsonify({"reply": bot_reply})
 
     except Exception as e:
@@ -43,7 +47,3 @@ def chat():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Use Render’s dynamic port
     app.run(host="0.0.0.0", port=port)
-
-
-
- 
